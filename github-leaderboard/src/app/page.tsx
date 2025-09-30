@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LatestPost } from "~/app/_components/post";
+import { GitHubCommits } from "~/app/_components/list";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -58,6 +59,10 @@ export default async function Home() {
               >
                 {session ? "Sign out" : "Sign in"}
               </Link>
+              <div className="w-full max-w-xl mt-8">
+                <h2 className="text-2xl font-bold mb-2">GitHub Commits</h2>
+                <GitHubCommits />
+              </div>
             </div>
           </div>
 

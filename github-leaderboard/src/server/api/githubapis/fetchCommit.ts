@@ -42,8 +42,6 @@ export async function fetchGitHubCommits(repoFullName: string) {
         deletions: full.data.stats?.deletions || 0,
         files: full.data.files?.map((f) => ({
           filename: f.filename,
-          additions: f.additions,
-          deletions: f.deletions,
           patch: f.patch || "",
         })),
       }))

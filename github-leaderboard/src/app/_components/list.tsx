@@ -24,6 +24,14 @@ export function GitHubCommits() {
           <p>{c.sha}</p>
           <p>{c.message}</p>
           <p>{c.author}</p>
+          <p>{c.additions}</p>
+          <p>{c.deletions}</p>
+         	{c.files?.map((file: any) => (
+						<div key={file.filename}>
+							<p>{file.filename}</p>
+							<pre>{file.patch}</pre>
+						</div>
+					))}
         </div>
       ))}
     </div>

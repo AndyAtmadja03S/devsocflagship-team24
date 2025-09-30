@@ -58,7 +58,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
   
   let commits: any[] = [];
   let page = 1;
-  const perPage = 10;
+  const perPage = 100;
 
   while (true) {
     // List commits per page
@@ -105,14 +105,12 @@ export async function fetchGitHubCommits(repoFullName: string) {
       acc[commit.author] = {
         commits: [],
         totalCommits: 0,
-        totalDelta: 0,
       };
     }
     acc[commit.author].commits.push(commit);
     acc[commit.author].totalCommits += 1;
-    acc[commit.author].totalDelta += commit.netChanges;
     return acc;
-  }, {} as Record<string, { commits: typeof commits; totalCommits: number; totalDelta: number }>);
+  }, {} as Record<string, { commits: typeof commits; totalCommits: number }>);
 
   // Find commit with max net changes for each author and assess quality
   const authorStats = await Promise.all(
@@ -139,7 +137,9 @@ export async function fetchGitHubCommits(repoFullName: string) {
         qualityScore,
         reasoning,
         totalCommits: data.totalCommits,
-        totalDelta: data.totalDelta,
+        patch: maxCommit.files?.map((f: any) => f.patch).join("\n\n") || "",
+        linesAdded: maxCommit.additions,
+        linesDeleted: maxCommit.deletions,
       };
     })
   );

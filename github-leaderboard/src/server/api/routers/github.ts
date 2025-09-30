@@ -8,6 +8,8 @@ export const githubRouter = createTRPCRouter({
   getCommits: publicProcedure
     .input(z.object({ repoFullName: z.string() }))
     .query(async ({ input }) => {
-      return fetchGitHubCommits(input.repoFullName);
+        const commits = await fetchGitHubCommits(input.repoFullName);
+        console.log("[tRPC] commits:", commits); 
+        return commits;
     }),
 });

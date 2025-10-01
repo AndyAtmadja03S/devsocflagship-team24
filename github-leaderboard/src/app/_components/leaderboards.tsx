@@ -1,11 +1,12 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import marioRun from "../../images/mario-run.png";
 import bg1 from "../../images/bg_1.svg";
 import bg2 from "../../images/bg_2.svg";
+import { useInactivity } from "../helper/inactivity";
 
 export function Leaderboards() {
   const [Clicked, setCliked] = useState<{
@@ -17,11 +18,39 @@ export function Leaderboards() {
     linesDeleted: number
   }>({author:"", qualityScore: 0, reasoning: "", totalCommits: 0, linesAdded: 0, linesDeleted: 0});
   const [repoName, setRepoName] = useState("");
+  const [searchRepo, setSearchRepo] = useState("");
 
-  const { data: commits, isLoading } = api.github.getCommits.useQuery(
-    { repoFullName: repoName },
-    { enabled: !!repoName } 
+  const { data: commits, isLoading, refetch } = api.github.getCommits.useQuery(
+    { repoFullName: searchRepo },
+    { 
+      enabled: !!searchRepo,
+      refetchOnWindowFocus: false
+    } 
   );
+
+  const isInactive = useInactivity(30 * 60 * 1000);
+  // uncomment to check
+  // if (isInactive) {
+  //   console.log("User is inactive");
+  // }
+
+  useEffect(() => {
+    if (!searchRepo) return;
+    if (isInactive) {
+      if (window.confirm("You've been inactive, leaderboard may have been updated, Refresh now?")) {
+        refetch();
+      }
+    }
+    const interval = setInterval(() => {
+      refetch();
+    }, 30 * 60* 1000);
+
+    return () => clearInterval(interval);
+  }, [searchRepo, isInactive, refetch]);
+
+  const handleSearch = () => {
+    setSearchRepo(repoName);
+  };
 
   return (
     <main className="flex min-h-screen min-w-[1100px] w-full flex-col items-center justify-center bg-gradient-to-b from-[#ffd54a] to-[#35aeb0] text-gray-900 overflow-hidden">
@@ -44,7 +73,7 @@ export function Leaderboards() {
             value={repoName}
             onChange={(e) => setRepoName(e.target.value)}
             />
-          <button type="submit" className="absolute inline-flex items-center h-10 px-4 py-2 text-sm text-white transition duration-150 ease-in-out rounded-full outline-none right-3 top-3 bg-teal-600 sm:px-6 sm:text-base sm:font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+          <button onClick={handleSearch} type="submit" className="absolute inline-flex items-center h-10 px-4 py-2 text-sm text-white transition duration-150 ease-in-out rounded-full outline-none right-3 top-3 bg-teal-600 sm:px-6 sm:text-base sm:font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
             <svg className="-ml-0.5 sm:-ml-1 mr-2 w-4 h-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>

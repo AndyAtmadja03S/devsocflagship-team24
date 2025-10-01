@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendLeaderboard } from '~/server/api/discordbot';
+import { startLeaderboardJob } from '~/server/api/discordScheduler';
 import { fetchGitHubCommits } from '~/server/api/githubapis/fetchCommit';
 
 export const runtime = 'nodejs';
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
     const leaderboard = await fetchGitHubCommits(repoFullName);
 
     await sendLeaderboard(channelId, leaderboard);
-
+    startLeaderboardJob(repoFullName, channelId);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error(err);

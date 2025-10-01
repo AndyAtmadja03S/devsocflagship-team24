@@ -4,18 +4,65 @@ import { LatestPost } from "~/app/_components/post";
 import { GitHubCommits } from "~/app/_components/list";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
+// import { useState } from "react";
+import Image from "next/image";
+import marioRun from "../images/mario-run.png";
+import { Leaderboards } from "./_components/leaderboards";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth();
-
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+      <main className="flex min-h-screen w-full">
+        <Leaderboards/>
+      </main>
+      {/* <main className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#ffd54a] to-[#35aeb0] text-gray-900">
+        <div className="flex min-h-screen w-full flex-col items-center justify-start gap-4 px-8 py-12">
+          <div className="flex min-h-[20%] h-[100px] w-fullrounded-xl items-center justify-center">
+            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+              RepoBoards!
+            </h1>
+          </div>
+          <div className="relative flex flex-row min-h-[20%] h-[70px] w-full rounded-full">
+            <input placeholder="Search Leaderboards!" className="rounded-full w-full h-16 bg-transparent py-2 pl-8 pr-32 outline-none border-2 border-gray-100 shadow-md hover:outline-none focus:ring-teal-500 focus:border-teal-500" type="text" name="query" id="query"/>
+            <button type="submit" className="absolute inline-flex items-center h-10 px-4 py-2 text-sm text-white transition duration-150 ease-in-out rounded-full outline-none right-3 top-3 bg-teal-600 sm:px-6 sm:text-base sm:font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+              <svg className="-ml-0.5 sm:-ml-1 mr-2 w-4 h-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              Search
+            </button>
+          </div>
+          <div className="flex w-full h-full items-center justify-center py-2">
+            <div className="relative flex flex-col w-full h-[150px] items-start justify-end">
+              <Image 
+                src={marioRun} 
+                alt="marioRun" 
+                className="absolute bottom-16"
+                style={{ 
+                  width: "auto", 
+                  height: "auto", 
+                  maxWidth: "150px", 
+                  left: `3%`,
+                  transform: `translateX(-45%)`,
+                  transition: "transform 0.3s ease", // smooth movement 
+                }}/>
+              <div className="w-full min-w-md bg-gray-100 rounded-full h-4 overflow-hidden ">
+                <div className={`bg-teal-600 h-full animate-[progress_2s_infinite_alternate_ease-in-out]`}
+                  style={{ width: `0%` }} 
+                ></div>
+              </div>
+              <div className="w-full min-w-md h-8 overflow-hidden mt-4">
+                <div className={`flex flex-row items-end justify-end h-full min-w-[60px] w-[0%] animate-[progress_2s_infinite_alternate_ease-in-out]`}>
+                  <div className="bg-white w-[60px] h-full rounded-lg"></div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </main> */}
+      {/* <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
             Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
@@ -68,7 +115,8 @@ export default async function Home() {
 
           {session?.user && <LatestPost />}
         </div>
-      </main>
+      </main> */}
+
     </HydrateClient>
   );
 }

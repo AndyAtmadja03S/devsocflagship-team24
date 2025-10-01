@@ -39,7 +39,7 @@ export function GitHubCommits() {
       {commits && commits.length > 0 && (
         <div className="space-y-4">
           {commits.map((c) => (
-            <div className="border p-4 rounded">
+            <div key={c.author} className="border p-4 rounded">
               <p className="font-bold">{c.author}</p>
               <p>
                 <strong>Score:</strong> {c.qualityScore ?? "N/A"}
@@ -51,7 +51,11 @@ export function GitHubCommits() {
                 <strong>TotalCommits:</strong> +{c.totalCommits}
               </p>
               <p>
-                <strong>+-:</strong> +{c.totalDelta}
+                <strong>+-:</strong> +{c.linesAdded}
+                <strong>+-:</strong> +{c.linesDeleted}
+              </p>
+              <p>
+                <pre>{c.patch}</pre>
               </p>
             </div>
           ))}

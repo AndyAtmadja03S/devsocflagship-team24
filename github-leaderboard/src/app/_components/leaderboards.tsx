@@ -8,6 +8,8 @@ import bg1 from "../../images/bg_1.svg";
 import bg2 from "../../images/bg_2.svg";
 import { useInactivity } from "../helper/inactivity";
 import { postLeaderboardToDiscord } from "../api/discord/discordhook";
+
+
 export function Leaderboards() {
   const [Clicked, setCliked] = useState<{
     author: string,
@@ -22,6 +24,7 @@ export function Leaderboards() {
   const [searchRepo, setSearchRepo] = useState("");
   const [discordChannelId, setDiscordChannelId] = useState('');
   const [hasAdded, setHasAdded] = useState(false);
+
   const { data: commits, isLoading, refetch } = api.github.getCommits.useQuery(
     { repoFullName: searchRepo },
     { 
@@ -141,6 +144,14 @@ export function Leaderboards() {
                   onChange={(e) => setDiscordChannelId(e.target.value)}
                   className="border p-2 rounded mr-2"
                 />
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <button
+                  onClick={() => window.open(botInviteUrl, "_blank")}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Add Bot to Your Server
+                </button>
               </div>
               {commits.sort((a, b) => a.qualityScore - b.qualityScore).map((c) => (
                 <div key={c.author}>

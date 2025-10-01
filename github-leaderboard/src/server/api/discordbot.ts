@@ -50,5 +50,3 @@ export async function sendLeaderboard(channelId: string, leaderboard: any[]) {
 
   await (channel as InstanceType<typeof bot.TextChannel>).send({ embeds: [embed] });
 }
-
-

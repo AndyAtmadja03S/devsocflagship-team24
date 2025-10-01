@@ -1,16 +1,17 @@
 import Link from "next/link";
 
 import { LatestPost } from "~/app/_components/post";
+import { GitHubCommits } from "~/app/_components/list";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-import { useState } from "react";
+// import { useState } from "react";
 import Image from "next/image";
 import marioRun from "../images/mario-run.png";
+import { Leaderboards } from "./_components/leaderboards";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
   const session = await auth();
-  const [xPercent, setXPercent] = useState(0); // 0 = left, 100 = right
 
   if (session?.user) {
     void api.post.getLatest.prefetch();
@@ -18,11 +19,11 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#ffd54a] to-[#35aeb0] text-gray-900">
+      <main className="flex min-h-screen w-full">
+        <Leaderboards/>
+      </main>
+      {/* <main className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#ffd54a] to-[#35aeb0] text-gray-900">
         <div className="flex min-h-screen w-full flex-col items-center justify-start gap-4 px-8 py-12">
-          {/* <text>
-            "tes"
-          </text> */}
           <div className="flex min-h-[20%] h-[100px] w-fullrounded-xl items-center justify-center">
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
               RepoBoards!
@@ -38,22 +39,34 @@ export default async function Home() {
             </button>
           </div>
           <div className="flex w-full h-full items-center justify-center py-2">
-            <div className="flex flex-col w-full h-[100px]">
-              <Image src={marioRun} alt="marioRun" style={{ 
-                width: "auto", 
-                height: "auto", 
-                maxWidth: "150px", 
-                transform: `translateX(${xPercent}%)`,
-                transition: "transform 0.3s ease", // smooth movement 
-              }}/>
-              <div className="w-full min-w-md bg-gray-100 rounded-full h-4 overflow-hidden">
-                <div className={`bg-teal-600 h-full w-[${xPercent}] animate-[progress_2s_infinite_alternate_ease-in-out]`}></div>
+            <div className="relative flex flex-col w-full h-[150px] items-start justify-end">
+              <Image 
+                src={marioRun} 
+                alt="marioRun" 
+                className="absolute bottom-16"
+                style={{ 
+                  width: "auto", 
+                  height: "auto", 
+                  maxWidth: "150px", 
+                  left: `3%`,
+                  transform: `translateX(-45%)`,
+                  transition: "transform 0.3s ease", // smooth movement 
+                }}/>
+              <div className="w-full min-w-md bg-gray-100 rounded-full h-4 overflow-hidden ">
+                <div className={`bg-teal-600 h-full animate-[progress_2s_infinite_alternate_ease-in-out]`}
+                  style={{ width: `0%` }} 
+                ></div>
+              </div>
+              <div className="w-full min-w-md h-8 overflow-hidden mt-4">
+                <div className={`flex flex-row items-end justify-end h-full min-w-[60px] w-[0%] animate-[progress_2s_infinite_alternate_ease-in-out]`}>
+                  <div className="bg-white w-[60px] h-full rounded-lg"></div>
+                </div>
               </div>
             </div>
             
           </div>
         </div>
-      </main>
+      </main> */}
       {/* <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
@@ -98,6 +111,10 @@ export default async function Home() {
               >
                 {session ? "Sign out" : "Sign in"}
               </Link>
+              <div className="w-full max-w-xl mt-8">
+                <h2 className="text-2xl font-bold mb-2">GitHub Commits</h2>
+                <GitHubCommits />
+              </div>
             </div>
           </div>
 

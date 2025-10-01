@@ -103,6 +103,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
         date: full.data.commit.author?.date || "",
         author:
           full.data.author?.login || full.data.commit.author?.name || "Unknown",
+        avatarUrl: full.data.author?.avatar_url || null,
         additions: full.data.stats?.additions || 0,
         deletions: full.data.stats?.deletions || 0,
         netChanges: (full.data.stats?.additions || 0) - (full.data.stats?.deletions || 0),
@@ -124,6 +125,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
         totalCommits: 0,
         linesAdded: 0,
         linesDeleted: 0,
+        avatarUrl: commit.avatarUrl
       };
     }
     acc[commit.author].commits.push(commit);
@@ -131,7 +133,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
     acc[commit.author].linesAdded += commit.additions;
     acc[commit.author].linesDeleted += commit.deletions;
     return acc;
-  }, {} as Record<string, { commits: typeof commits; totalCommits: number; linesAdded: number; linesDeleted: number }>);
+  }, {} as Record<string, { commits: typeof commits; totalCommits: number; linesAdded: number; linesDeleted: number;  avatarUrl: string | null }>);
 
   // Find commit with max net changes for each author and assess quality
   const authorStats = await Promise.all(
@@ -144,6 +146,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
       if (meaningfulCommits.length === 0) {
         return {
           author,
+          avatarUrl: data.avatarUrl,
           qualityScore: 0,
           reasoning: "No meaningful commits found",
           totalCommits: data.totalCommits,
@@ -179,6 +182,7 @@ export async function fetchGitHubCommits(repoFullName: string) {
 
       return {
         author,
+        avatarUrl: data.avatarUrl,
         qualityScore: finalImpactScore,
         reasoning,
         totalCommits: data.totalCommits,

@@ -1,12 +1,4 @@
-import Link from "next/link";
-
-import { LatestPost } from "~/app/_components/post";
-import { GitHubCommits } from "~/app/_components/list";
-import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-// import { useState } from "react";
-import Image from "next/image";
-import marioRun from "../images/mario-run.png";
 import { Leaderboards } from "./_components/leaderboards";
 
 export default async function Home() {

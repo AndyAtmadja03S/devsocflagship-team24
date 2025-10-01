@@ -21,6 +21,20 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`}>
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="/bg_1.svg"
+          type="image/svg+xml"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/bg_2.svg"
+          type="image/svg+xml"
+        />
+      </head>
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>

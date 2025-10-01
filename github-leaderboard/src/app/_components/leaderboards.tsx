@@ -7,7 +7,7 @@ import marioRun from "../../images/mario-run.png";
 import bg1 from "../../images/bg_1.svg";
 import bg2 from "../../images/bg_2.svg";
 import { useInactivity } from "../helper/inactivity";
-
+import { postLeaderboardToDiscord } from "../api/discord/discordhook";
 export function Leaderboards() {
   const [Clicked, setCliked] = useState<{
     author: string,
@@ -20,7 +20,8 @@ export function Leaderboards() {
   }>({author:"", avatarUrl: "", qualityScore: 0, reasoning: "", totalCommits: 0, linesAdded: 0, linesDeleted: 0});
   const [repoName, setRepoName] = useState("");
   const [searchRepo, setSearchRepo] = useState("");
-
+  const [discordChannelId, setDiscordChannelId] = useState('');
+  const [hasAdded, setHasAdded] = useState(false);
   const { data: commits, isLoading, refetch } = api.github.getCommits.useQuery(
     { repoFullName: searchRepo },
     { 
@@ -28,7 +29,9 @@ export function Leaderboards() {
       refetchOnWindowFocus: false
     } 
   );
-  
+
+  console.log(hasAdded);
+  const botInviteUrl = 'https://discord.com/oauth2/authorize?client_id=1422503631671791658&permissions=18432&integration_type=0&scope=bot';
   const isInactive = useInactivity(30 * 60 * 1000);
   // uncomment to check
   // if (isInactive) {
@@ -113,9 +116,32 @@ export function Leaderboards() {
                 clipPath: `inset(0 ${(10-commits[commits.length-1]?.qualityScore)*10}% 0 0)`,
               }}
             />
-
             {/* Leaderboards Legends */}
             <div className="relative flex flex-col w-full h-[210px] items-start justify-end">
+              <div className="mt-2">
+                <button
+                   onClick={() => {
+                    if (!hasAdded) {
+                      if (window.confirm("You need to invite the bot first. Do you want to open the invite link?")) {
+                        window.open(botInviteUrl, "_blank");
+                        setHasAdded(true);
+                      }
+                    } else {
+                      postLeaderboardToDiscord(searchRepo, discordChannelId);
+                    }
+                  }}
+                  className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+                >
+                  Post to Discord
+                </button>
+                <input
+                  type="text"
+                  placeholder="Discord Channel ID"
+                  value={discordChannelId}
+                  onChange={(e) => setDiscordChannelId(e.target.value)}
+                  className="border p-2 rounded mr-2"
+                />
+              </div>
               {commits.sort((a, b) => a.qualityScore - b.qualityScore).map((c) => (
                 <div key={c.author}>
                   <Image 

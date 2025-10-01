@@ -11,12 +11,13 @@ import { useInactivity } from "../helper/inactivity";
 export function Leaderboards() {
   const [Clicked, setCliked] = useState<{
     author: string,
+    avatarUrl: string | undefined,
     qualityScore: number,
     reasoning: string,
     totalCommits: number,
     linesAdded: number,
     linesDeleted: number
-  }>({author:"", qualityScore: 0, reasoning: "", totalCommits: 0, linesAdded: 0, linesDeleted: 0});
+  }>({author:"", avatarUrl: "", qualityScore: 0, reasoning: "", totalCommits: 0, linesAdded: 0, linesDeleted: 0});
   const [repoName, setRepoName] = useState("");
   const [searchRepo, setSearchRepo] = useState("");
 
@@ -27,7 +28,7 @@ export function Leaderboards() {
       refetchOnWindowFocus: false
     } 
   );
-
+  
   const isInactive = useInactivity(30 * 60 * 1000);
   // uncomment to check
   // if (isInactive) {
@@ -166,12 +167,17 @@ export function Leaderboards() {
               ))}
             </div>
           </div>
-
+            
           {/* Details */}
           <div className="flex flex-col w-[1000px] mt-20 space-y-4">
             {Clicked.author != "" &&
               <div key={Clicked.author} className="border p-4 rounded-xl">
                 <p className="font-bold">{Clicked.author}</p>
+                 <img
+                    src={Clicked.avatarUrl}
+                    alt={`${Clicked.author}'s avatar`}
+                    className="w-16 h-16 rounded-full border"
+                />
                 <p>
                   <strong>Score:</strong> {Clicked.qualityScore ?? "N/A"}
                 </p>
@@ -192,6 +198,13 @@ export function Leaderboards() {
             {commits.filter(c => c.author != Clicked.author).sort((a, b) => b.qualityScore - a.qualityScore).map((c) => (
               <div key={c.author} className="border p-4 rounded-xl">
                 <p className="font-bold">{c.author}</p>
+                {
+                  !c.avatarUrl ? null : <img
+                    src={c.avatarUrl}
+                    alt={`${c.author}'s avatar`}
+                    className="w-16 h-16 rounded-full border"
+                />
+                }
                 <p>
                   <strong>Score:</strong> {c.qualityScore ?? "N/A"}
                 </p>

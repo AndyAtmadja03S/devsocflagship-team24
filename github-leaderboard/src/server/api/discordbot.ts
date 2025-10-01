@@ -22,17 +22,20 @@ export async function getDiscordBot() {
       if (!interaction.isCommand()) return;
 
       const { commandName, options } = interaction;
-
+      console.log(`Logged in as ${discordBot.user.tag}`);
       if (commandName === "start") {
         const repo = options.getString("repo")!;
         const channel = options.getChannel("channel")!;
-        startLeaderboardJob(repo, channel.id);
-        await interaction.reply(`Started leaderboard for ${repo} in ${channel.name}`);
+        await interaction.deferReply();
+        const test = startLeaderboardJob(repo, channel.id);
+        console.log(test);
+        await interaction.editReply(`Started leaderboard for ${repo} in ${channel.name}`);
       }
 
       if (commandName === "stop") {
+        await interaction.deferReply();
         stopLeaderboardJob();
-        await interaction.reply(`Stopped leaderboard updates.`);
+        await interaction.editReply(`Stopped leaderboard updates.`);
       }
     });
   }

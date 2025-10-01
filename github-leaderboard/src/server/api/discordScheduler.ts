@@ -9,7 +9,7 @@ export function startLeaderboardJob(repoFullName: string, channelId: string) {
 
   if (activeJobs.has(key)) return;
 
-  const interval = setInterval(async () => {
+  const postLeaderboard = async () => {
     try {
       console.log(`[JOB] Posting leaderboard for ${repoFullName} → ${channelId}`);
       const leaderboard = await fetchGitHubCommits(repoFullName);
@@ -17,14 +17,20 @@ export function startLeaderboardJob(repoFullName: string, channelId: string) {
     } catch (err) {
       console.error("Error posting leaderboard:", err);
     }
-  }, 30 * 60 * 1000); 
+  };
 
+  postLeaderboard();
+
+  const interval = setInterval(postLeaderboard, 30 * 60 * 1000); 
   activeJobs.set(key, interval);
+  console.log(activeJobs);
 }
+
 
 export function stopLeaderboardJob() {
   for (const interval of activeJobs.values()) {
     clearInterval(interval);
   }
   activeJobs.clear();
+  console.log(activeJobs)
 }

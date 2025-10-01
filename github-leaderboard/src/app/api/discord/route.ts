@@ -9,9 +9,6 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const { repoFullName, channelId } = await req.json();
-    const leaderboard = await fetchGitHubCommits(repoFullName);
-
-    await sendLeaderboard(channelId, leaderboard);
     startLeaderboardJob(repoFullName, channelId);
     return NextResponse.json({ success: true });
   } catch (err) {

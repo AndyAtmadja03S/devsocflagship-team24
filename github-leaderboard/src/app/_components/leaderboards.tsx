@@ -35,7 +35,7 @@ export function Leaderboards() {
   );
 
   console.log(hasAdded);
-  const botInviteUrl = 'https://discord.com/oauth2/authorize?client_id=1422503631671791658&permissions=18432&integration_type=0&scope=bot';
+  const botInviteUrl = 'https://discord.com/oauth2/authorize?client_id=1422503631671791658&permissions=2147502080&integration_type=0&scope=bot';
   const isInactive = useInactivity(30 * 60 * 1000);
   // uncomment to check
   // if (isInactive) {

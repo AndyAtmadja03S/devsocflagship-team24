@@ -22,11 +22,9 @@ export function startLeaderboardJob(repoFullName: string, channelId: string) {
   activeJobs.set(key, interval);
 }
 
-// export function stopLeaderboardJob(repoFullName: string, channelId: string) {
-//   const key = `${repoFullName}:${channelId}`;
-//   const interval = activeJobs.get(key);
-//   if (interval) {
-//     clearInterval(interval);
-//     activeJobs.delete(key);
-//   }
-// }
+export function stopLeaderboardJob() {
+  for (const interval of activeJobs.values()) {
+    clearInterval(interval);
+  }
+  activeJobs.clear();
+}

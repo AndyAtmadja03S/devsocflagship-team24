@@ -1,4 +1,8 @@
 'use server';
+
+import { startLeaderboardJob, stopLeaderboardJob } from './discordScheduler';
+import { registerCommands } from './discordCommands'; // your registration function
+
 let discordBot: any;
 
 export async function getDiscordBot() {
@@ -13,8 +17,36 @@ export async function getDiscordBot() {
 
     discordBot.TextChannel = TextChannel;
     discordBot.EmbedBuilder = EmbedBuilder;
+
+    discordBot.on("interactionCreate", async (interaction: any) => {
+      if (!interaction.isCommand()) return;
+
+      const { commandName, options } = interaction;
+
+      if (commandName === "start") {
+        const repo = options.getString("repo")!;
+        const channel = options.getChannel("channel")!;
+        startLeaderboardJob(repo, channel.id);
+        await interaction.reply(`Started leaderboard for ${repo} in ${channel.name}`);
+      }
+
+      if (commandName === "stop") {
+        stopLeaderboardJob();
+        await interaction.reply(`Stopped leaderboard updates.`);
+      }
+    });
   }
   return discordBot;
+}
+
+export async function handleRegisterCommands(guildId: string) {
+  const clientId = 
+  "1422503631671791658";
+  try {
+    await registerCommands(clientId, guildId);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 export async function sendLeaderboard(channelId: string, leaderboard: any[]) {

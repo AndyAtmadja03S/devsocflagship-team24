@@ -8,7 +8,7 @@ import bg1 from "../../images/bg_1.svg";
 import bg2 from "../../images/bg_2.svg";
 import { useInactivity } from "../helper/inactivity";
 import { postLeaderboardToDiscord } from "../api/discord/discordhook";
-
+import { handleRegisterCommands } from "~/server/api/discordbot";
 
 export function Leaderboards() {
   const [Clicked, setCliked] = useState<{
@@ -23,7 +23,8 @@ export function Leaderboards() {
   const [repoName, setRepoName] = useState("");
   const [searchRepo, setSearchRepo] = useState("");
   const [discordChannelId, setDiscordChannelId] = useState('');
-  const [hasAdded, setHasAdded] = useState(false);
+  const [discordGuildId, setDiscordGuildId] = useState('');
+  const [hasAdded, setHasAdded] = useState(false);  
 
   const { data: commits, isLoading, refetch } = api.github.getCommits.useQuery(
     { repoFullName: searchRepo },
@@ -153,6 +154,17 @@ export function Leaderboards() {
                   Add Bot to Your Server
                 </button>
               </div>
+
+              <input
+                type="text"
+                placeholder="Enter your server's Guild ID"
+                className="bg-red-100"
+                value={discordGuildId}
+                onChange={(e) => setDiscordGuildId(e.target.value)}
+              />
+              <button onClick={() => handleRegisterCommands(discordGuildId)}>
+                Register Commands
+              </button>
               {commits.sort((a, b) => a.qualityScore - b.qualityScore).map((c) => (
                 <div key={c.author}>
                   <Image 

@@ -11,15 +11,34 @@ export interface CommitFile {
   patch: string;
 }
 
+export interface Commit {
+  sha: string;
+  message: string;
+  date: string;
+  author: string;
+  avatarUrl: string | undefined;
+  additions: number;
+  deletions: number;
+  netChanges: number;
+  files: CommitFile[];
+}
+
+export interface AuthorCommits {
+  commits: Commit[];
+  totalCommits: number;
+  linesAdded: number;
+  linesDeleted: number;
+  avatarUrl: string | undefined;
+}
+
 async function assessPatchesQuality(files: CommitFile[]) {
   try {
-    // Filter out very large patches to avoid token limits
     const filteredFiles = files
       .filter(f => f.patch && f.patch.length < 10000)
-      .slice(0, 5); // Limit to 5 files max
+      .slice(0, 5);
 
     if (filteredFiles.length === 0) {
-      return { score: null, reasoning: "No suitable patches to assess" };
+      return { score: null as number | null, reasoning: "No suitable patches to assess" };
     }
 
     const prompt = filteredFiles.map((f, i) => `
@@ -43,12 +62,10 @@ ${f.patch}
 
       Return ONLY a valid JSON object with the following fields:
       {
-        "score": number,       // numeric quality score (0-10)
-        "reasoning": string    // short reasoning (1-2 sentences)
+        "score": number,
+        "reasoning": string
       }
       
-      "reasoning" should explain the score as completely as possible.
-
       Code patches:
       ${prompt}`
       }],
@@ -60,7 +77,7 @@ ${f.patch}
       return { score: null, reasoning: "No response from AI" };
     }
     
-    return JSON.parse(content);
+    return JSON.parse(content) as { score: number | null; reasoning: string };
   } catch (error) {
     console.error("Error assessing patch quality:", error);
     return { score: null, reasoning: "Error assessing quality" };
@@ -73,12 +90,11 @@ export async function fetchGitHubCommits(repoFullName: string) {
     throw new Error("Invalid repoFullName. Must be in 'owner/repo' format.");
   }
   
-  let commits: any[] = [];
+  const commits: Commit[] = [];
   let page = 1;
   const perPage = 100;
 
   while (true) {
-    // List commits per page
     const response = await octokit.rest.repos.listCommits({
       owner,
       repo,
@@ -88,57 +104,57 @@ export async function fetchGitHubCommits(repoFullName: string) {
 
     if (response.data.length === 0) break;
 
-    // Fetch commit details (stats + files) in parallel
     const commitDetails = await Promise.all(
       response.data.map((c) =>
         octokit.rest.repos.getCommit({ owner, repo, ref: c.sha })
       )
     );
 
-    // Map to commits obj including patch
     commits.push(
-      ...commitDetails.map((full) => ({
+      ...commitDetails.map((full): Commit => ({
         sha: full.data.sha,
         message: full.data.commit.message,
         date: full.data.commit.author?.date || "",
         author:
           full.data.author?.login || full.data.commit.author?.name || "Unknown",
-        avatarUrl: full.data.author?.avatar_url || null,
+        avatarUrl: full.data.author?.avatar_url || undefined,
         additions: full.data.stats?.additions || 0,
         deletions: full.data.stats?.deletions || 0,
         netChanges: (full.data.stats?.additions || 0) - (full.data.stats?.deletions || 0),
         files: full.data.files?.map((f) => ({
           filename: f.filename,
           patch: f.patch || "",
-        })),
+        })) || [],
       }))
     );
 
     page++;
   }
 
-  // Group commits by author and calculate stats
-  const commitsByAuthor = commits.reduce((acc, commit) => {
-    if (!acc[commit.author]) {
-      acc[commit.author] = {
-        commits: [],
-        totalCommits: 0,
-        linesAdded: 0,
-        linesDeleted: 0,
-        avatarUrl: commit.avatarUrl
-      };
-    }
-    acc[commit.author].commits.push(commit);
-    acc[commit.author].totalCommits += 1;
-    acc[commit.author].linesAdded += commit.additions;
-    acc[commit.author].linesDeleted += commit.deletions;
-    return acc;
-  }, {} as Record<string, { commits: typeof commits; totalCommits: number; linesAdded: number; linesDeleted: number;  avatarUrl: string | null }>);
+  // Group commits by author
+  const commitsByAuthor: Record<string, AuthorCommits> = commits.reduce(
+    (acc: any, commit) => {
+      if (!acc[commit.author]) {
+        acc[commit.author] = {
+          commits: [],
+          totalCommits: 0,
+          linesAdded: 0,
+          linesDeleted: 0,
+          avatarUrl: commit.avatarUrl,
+        };
+      }
+      acc[commit.author].commits.push(commit);
+      acc[commit.author].totalCommits += 1;
+      acc[commit.author].linesAdded += commit.additions;
+      acc[commit.author].linesDeleted += commit.deletions;
+      return acc;
+    },
+    {} as Record<string, AuthorCommits>
+  );
 
-  // Find commit with max net changes for each author and assess quality
+  // Author stats
   const authorStats = await Promise.all(
     Object.entries(commitsByAuthor).map(async ([author, data]) => {
-      // Filter out auto-generated commits
       const meaningfulCommits = data.commits.filter(c => 
         c.files && !isAutoGeneratedCommit(c.files)
       );
@@ -154,20 +170,18 @@ export async function fetchGitHubCommits(repoFullName: string) {
           linesDeleted: data.linesDeleted,
         };
       }
-      // Calculate aggregate impact score
+
       const aggregateImpact = calculateAggregateImpact(meaningfulCommits);
 
-      // Find top 3 commits by net changes
       const topCommits = meaningfulCommits
-        .sort((a: any, b: any) => Math.abs(b.netChanges) - Math.abs(a.netChanges))
+        .sort((a, b) => Math.abs(b.netChanges) - Math.abs(a.netChanges))
         .slice(0, 3);
 
-      // Assess quality on the largest meaningful commit
-      let qualityScore = null;
+      let qualityScore: number | null = null;
       let reasoning = "";
 
       if (topCommits[0]?.files && topCommits[0].files.length > 0) {
-        const filesWithPatches = topCommits[0].files.filter((f: any) => f.patch);
+        const filesWithPatches = topCommits[0].files.filter(f => f.patch);
         
         if (filesWithPatches.length > 0) {
           const assessment = await assessPatchesQuality(filesWithPatches);

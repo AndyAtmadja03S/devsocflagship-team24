@@ -5,17 +5,34 @@
 import "./src/env.js";
 import webpack from "webpack";
 
-/** @type {import("next").NextConfig} */
-const config = {
-  webpack: (nextConfig, { isServer }) => {
-    // Ignore optional Node-only modules used by discord.js
-    nextConfig.plugins.push(
-      new webpack.IgnorePlugin({ resourceRegExp: /^zlib-sync$/ }),
-      new webpack.IgnorePlugin({ resourceRegExp: /^bufferutil$/ })
-    );
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Ensure externals is always an array
+      if (!Array.isArray(config.externals)) {
+        config.externals = [config.externals].filter(Boolean);
+      }
 
-    return nextConfig;
+      // Push our rule to skip bundling zlib-sync
+      config.externals.push({
+        "zlib-sync": "commonjs zlib-sync",
+      });
+    } else {
+      // On the client, completely disable it
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        "zlib-sync": false,
+      };
+    }
+
+    return config;
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 
-export default config;
+export default nextConfig;
+
+

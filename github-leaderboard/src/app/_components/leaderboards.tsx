@@ -5,8 +5,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import marioRun from "../../images/mario-run.png";
 import pp_icon from "../../images/pp_icon.svg"
-import bg1 from "../../images/bg_1.svg";
-import bg2 from "../../images/bg_2.svg";
 import { useInactivity } from "../helper/inactivity";
 import { postLeaderboardToDiscord } from "../api/discord/discordhook";
 import { handleRegisterCommands } from "~/server/api/discordbot";
@@ -166,7 +164,11 @@ export function Leaderboards() {
               style={{
                 backgroundImage: `url(/bg_1.svg)`,
                 backgroundSize: "100% 100%",
-                clipPath: startWipe ? `inset(0 ${(100 - (commits[commits.length-1]?.qualityScore)/10)}% 0 0)` : "inset(0 100% 0 0)",
+                clipPath: startWipe
+                  ? `inset(0 ${
+                      100 - ((commits?.[commits.length - 1]?.qualityScore ?? 0) / 10)
+                    }% 0 0)`
+                  : "inset(0 100% 0 0)",
               }}
             />
 

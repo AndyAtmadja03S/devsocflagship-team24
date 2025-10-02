@@ -1,4 +1,5 @@
 'use server';
+import "server-only"; 
 
 import { startLeaderboardJob, stopLeaderboardJob } from './discordScheduler';
 import { registerCommands } from './discordCommands'; // your registration function
